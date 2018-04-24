@@ -1,81 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>City_search</title>
-    <link rel="stylesheet" href="./css.css">
+    <title>使用easymock快速构建web数据驱动的页面</title>
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body>
-    <div class="box"></div>
-    <form action="" class="search-form">
-        <input type="text" class="search" placeholder="City or State">
-        <ul class="suggestions">
-            <li>Filter for a city</li>
-            <li>or a State</li>
-        </ul>
-    </form>
-    <script>
-      /*找到input元素，不会变的，就在那里，常量*/
-      //var  es5
-      //要匹配城市，城市的数据源吧？ 不在本地，而在服务器，请求数据
-      //城市数据在哪？ 资源web 暴露资源的方式，URL API
-      //1 资源
-      const endpoint='https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
-      //2 引用资源，从远程到本地 BS计算在本地
-      //去取要花时间，then  等你拿来了
-      const cities=[];
-      fetch(endpoint)
-      //拿到了服务里的数据块，json化一下，将数据变成json格式
-        .then(blob =>blob.json())
-        //一切就绪
-        .then(data=>{
-          // console.log(data)
-          cities.push(...data)
-          })
-      
-      function displayMatches(){
-        console.log(this.value)
-        //cities过滤后的数组 match匹配->this.value
-        //过滤任务，封装成一个函数
-        const matchArray=findMatches(this.value,cities)
-        console.log(matchArray)
-        const html=matchArray.map(city=>{
-          return `
-            <li>
-              <span class="name">${city.city}</span>
-              <span class="population">${city.population}</span>   
-            <li>
-          `
-        })
+    <!-- easymock
+    提供一个数据API
+    应用得资源通过url的方式向外暴露数据,API
+    
+    前端如何引用一个库?
+    bootstrap twitter推出的最受欢迎的前端框架
+    70%左右的轮子都是现成的,
+    使用cdn 一个下载到本地,烦,
+    cdn 是加速的分发网络服务器
+    静态文件会缓存
         
 
-        function findMatches(wordToMatch,cities){
-          console.log(wordToMatch,cities)
-          //完成匹配
-          return cities.filter(city=>{
-            //条件true 要的，false 不要的
-            //json 点操作运算符
+-->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <table class="table" id="stuTable">
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>籍贯</th>
+                            <th>QQ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
 
-            const regex=new RegExp(wordToMatch,'gi');
-            return city.city.match(regex);
-          })
-      
-        }
-        // const html=`
-        
-        // <li>
-        //   <span class="name">硅谷</span>
-        //   <span class="population">500万人</span>
-        // </li>
-        // `
-        document.querySelector('.suggestions').innerHTML=html
-      }
-      const searchInput=document.querySelector('.search');
-      // console.log(searchInput);
-      //事件是js 事件类型是keyup 注册键盘事件，事件发生时，交给回调函数处理
-      searchInput.addEventListener('keyup',displayMatches);
-    </script>
+            </div>
+        </div>
+        <div class="row">
+                <div class="col-md-4 col-md-offset-4">
+                    <form name="addForm">
+                      <div class="form-group">
+                        <label for="usernameInput">姓名</label>
+                        <input type="text" class="form-control"
+                         id="usernameInput" 
+                         placeholder="请输入您的姓名">
+                      </div>
+                      <div class="form-group">
+                        <label for="hometownInput">籍贯</label>
+                        <input type="text" class="form-control"
+                         id="hometownInput" placeholder="请输入籍贯">
+                      </div>
+                      <div class="form-group">
+                          <label for="qqInput">qq</label>
+                          <input type="text" class="form-control"
+                           id="qqInput" placeholder="请输入QQ">
+                        </div>
+                      <button type="submit"
+                       class="btn btn-default">添加</button>
+                    </form>
+                </div>
+              </div>
+        </div>
+
+    </div>
+
 </body>
-<html>
+<script>
+    /* 封装函数可以复用 */
+    function renderStudentsHTML(students) {
+        const html = students.map(students => `
+        <tr>
+            <td>${students.name}</td>
+            <td>${students.hometown}</td>
+            <td>${students.qq}</td>
+        </tr>       
+        `).join('')
+        document.querySelector('#stuTable tbody').innerHTML=html;
+    }
+
+    window.onload = function () {
+        fetch('https://www.easy-mock.com/mock/5adf029f03701d27fce72dc8/infos')
+            .then(data => data.json())
+            .then(data => {
+                const students = data.data.infos
+                // console.log(student)
+                renderStudentsHTML(students)
+            })
+    }
+
+    document.forms['addForm'].addEventListener(
+    'submit', function(event) {
+      event.preventDefault();
+      const strUsername = 
+        document.getElementById('usernameInput').value;
+      const strHometown = 
+        document.getElementById('hometownInput').value;
+      const strQQ = 
+      document.getElementById('qqInput').value;
+      console.log(strUsername, strHometown, strQQ);
+      const oTr = document.createElement('tr');
+      const oTd1 = document.createElement('td');
+      const oTd2 = document.createElement('td');
+      const oTd3 = document.createElement('td');
+
+      oTr.appendChild(oTd1);
+
+      oTd1.appendChild(
+        document.createTextNode(strUsername)
+      );
+      oTr.appendChild(oTd2);
+      oTd2.appendChild(
+        document.createTextNode(strHometown)
+      );
+      oTr.appendChild(oTd3);
+      oTd3.appendChild(
+        document.createTextNode(strQQ)
+      );
+      document.querySelector('#stuTable tbody')
+        .appendChild(oTr);
+        document.forms['addForm'].reset()
+        // document.getElementById('usernameInput').value='';
+        // document.getElementById('hometownInput').value=null;
+        // document.getElementById('qqInput').value=null;
+        },false);
+</script>
+
+</html>
