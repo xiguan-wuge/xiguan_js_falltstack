@@ -1,132 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>使用easymock快速构建web数据驱动的页面</title>
-    <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="./main.css">
+  <title>3d books</title>
 </head>
-
 <body>
-    <!-- easymock
-    提供一个数据API
-    应用得资源通过url的方式向外暴露数据,API
-    
-    前端如何引用一个库?
-    bootstrap twitter推出的最受欢迎的前端框架
-    70%左右的轮子都是现成的,
-    使用cdn 一个下载到本地,烦,
-    cdn 是加速的分发网络服务器
-    静态文件会缓存
-        
-
--->
-    <div class="container">
-        <div class="row">
-            <div class="col-md-8 col-md-offset-2">
-                <table class="table" id="stuTable">
-                    <thead>
-                        <tr>
-                            <th>姓名</th>
-                            <th>籍贯</th>
-                            <th>QQ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-
+    <div class="book p3d">
+        <div class="back-cover p3d">
+            <div class="page back flip"></div>
+            <div class="page front p3d">
+                <div class="shadow" ></div>
+                <div class="dino" style="transform: translateZ(1px) skewX(-2.00625deg);"></div>
             </div>
         </div>
-        <div class="row">
-                <div class="col-md-4 col-md-offset-4">
-                    <form name="addForm">
-                      <div class="form-group">
-                        <label for="usernameInput">姓名</label>
-                        <input type="text" class="form-control"
-                         id="usernameInput" 
-                         placeholder="请输入您的姓名">
-                      </div>
-                      <div class="form-group">
-                        <label for="hometownInput">籍贯</label>
-                        <input type="text" class="form-control"
-                         id="hometownInput" placeholder="请输入籍贯">
-                      </div>
-                      <div class="form-group">
-                          <label for="qqInput">qq</label>
-                          <input type="text" class="form-control"
-                           id="qqInput" placeholder="请输入QQ">
-                        </div>
-                      <button type="submit"
-                       class="btn btn-default">添加</button>
-                    </form>
-                </div>
-              </div>
+        <div class="front-cover p3d">
+            <div class="page front flip p3d">
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam fermentum nisl quis nulla eleifend dignissim. Curabitur varius
+                    lobortis tincidunt. Maecenas gravida, nulla quis luctus imperdiet, ipsum nibh consectetur ante, in sodales
+                    massa tortor eget neque. Donec porta ligula massa, id sagittis est. Ut nisl tellus, faucibus nec feugiat
+                    ut, laoreet iaculis felis. Suspendisse ultrices mauris vel tellus suscipit commodo. Integer vitae tortor
+                    erat. Pellentesque non tempor nisi.
+                </p>
+            </div>
+            <div class="page back"></div>
         </div>
-
     </div>
 
+    <script>
+        // 函数创建作用域，外界无法访问, 减少全局变量的使用(污染)
+        // 立即执行函数
+        // xm 命名空间，外界通过命名空间访问内部信息
+        var xm = (function () {
+            var book = document.querySelector('.book');
+            var page = document.querySelector('.front-cover');
+            var dino = document.querySelector('.dino');
+            var shadow = document.querySelector('.shadow');
+            var hold = false;
+            var pageSize = 300;
+            var centerPoint = window.innerWidth / 2;
+            var prefixes = [
+                'Webkit',
+                'Moz',
+                'ms',
+                'o',
+                ''
+            ]
+
+            var clamp = function (val, min, max) {
+                return Math.max(min, Math.min(val, max))
+            }
+
+            page.onmousedown = function () {
+                hold = true
+            }
+
+            page.onmouseup = function () {
+                hold = false
+            }
+
+            // 事件发生的一瞬间，存在一个 event 对象 evt
+            window.onmousemove = function (evt) {
+                if (!hold) {
+                    return;
+                }
+
+                var angle = clamp((centerPoint - evt.pageX + pageSize) / pageSize * -90, -180, 0);
+
+                // 优化循环  减少 prefixes.length 的计算
+                for (let i = 0, len = prefixes.length; i < len; i++) {
+                    var prefix = prefixes[i];
+                    book.style[prefix + 'transform'] = 'rotateX(' + (60 + angle / 8) + 'deg)';
+                    page.style[prefix + 'transform'] = 'rotateY(' + angle + 'deg)';
+                    dino.style[prefix + 'transform'] = 'translateX(' + (angle/2) + 'deg)';
+                    shadow.style[prefix + 'transform'] = 'translateZ(1px) skewX(' + (angle/8) + 'deg)';
+                }
+
+                //  在之前的倾斜度上，再倾斜 15
+                // book.style.transform = 'rotateX(' + (60 + angle / 8) + 'deg)';
+                //  翻开首页
+                // page.style.transform = 'rotateY(' + angle + 'deg)';
+                // page.style.WebkitTransform = 'rotateY(' + angle + 'deg)';
+            }
+        }) ()
+
+    </script>
+
 </body>
-<script>
-    /* 封装函数可以复用 */
-    function renderStudentsHTML(students) {
-        const html = students.map(students => `
-        <tr>
-            <td>${students.name}</td>
-            <td>${students.hometown}</td>
-            <td>${students.qq}</td>
-        </tr>       
-        `).join('')
-        document.querySelector('#stuTable tbody').innerHTML=html;
-    }
-
-    window.onload = function () {
-        fetch('https://www.easy-mock.com/mock/5adf029f03701d27fce72dc8/infos')
-            .then(data => data.json())
-            .then(data => {
-                const students = data.data.infos
-                // console.log(student)
-                renderStudentsHTML(students)
-            })
-    }
-
-    document.forms['addForm'].addEventListener(
-    'submit', function(event) {
-      event.preventDefault();
-      const strUsername = 
-        document.getElementById('usernameInput').value;
-      const strHometown = 
-        document.getElementById('hometownInput').value;
-      const strQQ = 
-      document.getElementById('qqInput').value;
-      console.log(strUsername, strHometown, strQQ);
-      const oTr = document.createElement('tr');
-      const oTd1 = document.createElement('td');
-      const oTd2 = document.createElement('td');
-      const oTd3 = document.createElement('td');
-
-      oTr.appendChild(oTd1);
-
-      oTd1.appendChild(
-        document.createTextNode(strUsername)
-      );
-      oTr.appendChild(oTd2);
-      oTd2.appendChild(
-        document.createTextNode(strHometown)
-      );
-      oTr.appendChild(oTd3);
-      oTd3.appendChild(
-        document.createTextNode(strQQ)
-      );
-      document.querySelector('#stuTable tbody')
-        .appendChild(oTr);
-        document.forms['addForm'].reset()
-        // document.getElementById('usernameInput').value='';
-        // document.getElementById('hometownInput').value=null;
-        // document.getElementById('qqInput').value=null;
-        },false);
-</script>
-
 </html>
